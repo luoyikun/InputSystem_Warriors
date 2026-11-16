@@ -42,11 +42,11 @@ You can learn more about the Input System here: https://unity.com/features/input
 ## Tech Info
 
 **Unity Version**
-- Current: [6000.3.0f1](https://unity.com/releases/unity-6)
+- Current: 2022.3.62f2c1 (Unity 2022 LTS)
 
 **Packages**
 - com.unity.inputsystem: 1.16.0
-- com.unity.render-pipelines.universal: 17.3.0
+- com.unity.render-pipelines.universal: 14.0.12
 
 **Hardware**
 
