@@ -8,6 +8,7 @@ public class UIMenuOptionBehaviour : MonoBehaviour
 
     public void ButtonOptionSelected()
     {
+        Debug.Log($"[输入跟踪] 已点击菜单按钮。上下文面板编号={contextPanelID}。", this);
         UIManager.Instance.MenuButtonOptionSelected(contextPanelID);
     }
 }

@@ -32,6 +32,7 @@ public class UIMenuBehaviour : MonoBehaviour
 
     public void UpdateUIMenuState(bool newState)
     {
+        Debug.Log($"[输入跟踪] 暂停菜单已{(newState ? "打开" : "关闭")}。", this);
         switch (newState)
         {
             case true:

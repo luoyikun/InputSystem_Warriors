@@ -36,6 +36,8 @@ public class GameManager : Singleton<GameManager>
 
         isPaused = false;
 
+        Debug.Log($"[输入跟踪] 输入系统已就绪。游戏模式='{currentGameMode}'，检测到的设备数量={InputSystem.devices.Count}。", this);
+
         SetupBasedOnGameState();
         SetupUI();
     }
@@ -123,6 +125,8 @@ public class GameManager : Singleton<GameManager>
         focusedPlayerController = newFocusedPlayerController;
 
         isPaused = !isPaused;
+
+        Debug.Log($"[输入跟踪] 玩家 {focusedPlayerController.GetPlayerID() + 1} 切换了暂停状态。当前暂停={isPaused}。", this);
 
         ToggleTimeScale();
 

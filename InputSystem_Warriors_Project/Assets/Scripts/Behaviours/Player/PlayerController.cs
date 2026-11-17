@@ -37,6 +37,8 @@ public class PlayerController : MonoBehaviour
 
         currentControlScheme = playerInput.currentControlScheme;
 
+        Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 已初始化。当前动作映射='{playerInput.currentActionMap?.name}'，控制方案='{currentControlScheme}'，已配对设备='{GetPairedDeviceNames()}'，全部动作映射='{GetActionMapNames()}'。", this);
+
         playerMovementBehaviour.SetupBehaviour();
         playerAnimationBehaviour.SetupBehaviour();
         playerVisualsBehaviour.SetupBehaviour(playerID, playerInput);
@@ -53,11 +55,17 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 inputMovement = value.ReadValue<Vector2>();
         rawInputMovement = new Vector3(inputMovement.x, 0, inputMovement.y);
+
+        if (value.started || value.canceled)
+        {
+            Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 输入动作 '{value.action.name}'，阶段={value.phase}，来源='{value.control?.path}'，值={inputMovement}。", this);
+        }
     }
 
     //This is called from PlayerInput, when a button has been pushed, that corresponds with the 'Attack' action
     public void OnAttack(InputAction.CallbackContext value)
     {
+        Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 输入动作 '{value.action.name}'，阶段={value.phase}，来源='{value.control?.path}'。", this);
         if(value.started)
         {
             playerAnimationBehaviour.PlayAttackAnimation();
@@ -67,9 +75,34 @@ public class PlayerController : MonoBehaviour
     //This is called from Player Input, when a button has been pushed, that correspons with the 'TogglePause' action
     public void OnTogglePause(InputAction.CallbackContext value)
     {
+        Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 输入动作 '{value.action.name}'，阶段={value.phase}，来源='{value.control?.path}'。", this);
         if(value.started)
         {
             GameManager.Instance.TogglePauseState(this);
+        }
+    }
+
+    public void OnNavigate(InputAction.CallbackContext value)
+    {
+        if (value.started || value.canceled)
+        {
+            Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 菜单输入动作 '{value.action.name}'，阶段={value.phase}，来源='{value.control?.path}'。", this);
+        }
+    }
+
+    public void OnSubmit(InputAction.CallbackContext value)
+    {
+        if (value.started)
+        {
+            Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 菜单输入动作 '{value.action.name}'，阶段={value.phase}，来源='{value.control?.path}'。", this);
+        }
+    }
+
+    public void OnCancel(InputAction.CallbackContext value)
+    {
+        if (value.started)
+        {
+            Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 菜单输入动作 '{value.action.name}'，阶段={value.phase}，来源='{value.control?.path}'。", this);
         }
     }
 
@@ -86,7 +119,10 @@ public class PlayerController : MonoBehaviour
 
         if(playerInput.currentControlScheme != currentControlScheme)
         {
+            string previousControlScheme = currentControlScheme;
             currentControlScheme = playerInput.currentControlScheme;
+
+            Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 控制方案从 '{previousControlScheme}' 切换为 '{currentControlScheme}'，当前动作映射的所有按键覆盖将被清除。", this);
 
             playerVisualsBehaviour.UpdatePlayerVisuals();
             RemoveAllBindingOverrides();
@@ -100,12 +136,14 @@ public class PlayerController : MonoBehaviour
 
     public void OnDeviceLost()
     {
+        Debug.LogWarning($"[输入跟踪] 玩家 {playerID + 1} 的输入设备已断开。", this);
         playerVisualsBehaviour.SetDisconnectedDeviceVisuals();
     }
 
 
     public void OnDeviceRegained()
     {
+        Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 的输入设备已重新连接。", this);
         StartCoroutine(WaitForDeviceToBeRegained());
     }
 
@@ -151,6 +189,7 @@ public class PlayerController : MonoBehaviour
 
     public void SetInputActiveState(bool gameIsPaused)
     {
+        Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 的输入已因暂停状态而{(gameIsPaused ? "停用" : "启用")}。", this);
         switch (gameIsPaused)
         {
             case true:
@@ -176,12 +215,42 @@ public class PlayerController : MonoBehaviour
     
     public void EnableGameplayControls()
     {
-        playerInput.SwitchCurrentActionMap(actionMapPlayerControls);  
+        playerInput.SwitchCurrentActionMap(actionMapPlayerControls);
+        Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 已切换到动作映射 '{playerInput.currentActionMap.name}'。", this);
     }
 
     public void EnablePauseMenuControls()
     {
         playerInput.SwitchCurrentActionMap(actionMapMenuControls);
+        Debug.Log($"[输入跟踪] 玩家 {playerID + 1} 已切换到动作映射 '{playerInput.currentActionMap.name}'。", this);
+    }
+
+    string GetPairedDeviceNames()
+    {
+        if (playerInput.devices.Count == 0)
+        {
+            return "none";
+        }
+
+        string[] deviceNames = new string[playerInput.devices.Count];
+        for (int i = 0; i < playerInput.devices.Count; i++)
+        {
+            deviceNames[i] = playerInput.devices[i].displayName;
+        }
+
+        return string.Join(", ", deviceNames);
+    }
+
+    string GetActionMapNames()
+    {
+        var actionMaps = playerInput.actions.actionMaps;
+        string[] actionMapNames = new string[actionMaps.Count];
+        for (int i = 0; i < actionMaps.Count; i++)
+        {
+            actionMapNames[i] = actionMaps[i].name;
+        }
+
+        return string.Join(", ", actionMapNames);
     }
 
 

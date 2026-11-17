@@ -14,6 +14,7 @@ public class UIRebindActionBehaviour : MonoBehaviour
     private InputActionRebindingExtensions.RebindingOperation rebindOperation;
 
     [Header("Rebind Settings")]
+    // 要重新绑定的输入动作名称。在 Inspector 中赋值，必须与当前焦点玩家的 Input Actions 资源中的动作名称一致（例如 "Attack"）。
     public string actionName;
 
     [Header("Device Display Settings")]
@@ -60,6 +61,7 @@ public class UIRebindActionBehaviour : MonoBehaviour
 
     void StartRebindProcess()
     {
+        Debug.Log($"[输入跟踪] 开始重新绑定。玩家={GameManager.Instance.GetFocusedPlayerController().GetPlayerID() + 1}，动作='{focusedInputAction.name}'，正在等待输入。", this);
         
         ToggleGameObjectState(rebindButtonObject, false);
         ToggleGameObjectState(resetButtonObject, false);
@@ -73,14 +75,15 @@ public class UIRebindActionBehaviour : MonoBehaviour
             .WithControlsExcluding("<Keyboard>/p")
             .WithControlsExcluding("<Keyboard>/escape")
             .OnMatchWaitForAnother(0.1f)
-            .OnComplete(operation => RebindCompleted());
+            .OnComplete(operation => RebindCompleted(operation));
 
         rebindOperation.Start();
     }
 
 
-    void RebindCompleted()
+    void RebindCompleted(InputActionRebindingExtensions.RebindingOperation operation)
     {
+        Debug.Log($"[输入跟踪] 重新绑定完成。动作='{focusedInputAction.name}'，捕获的输入路径='{operation.selectedControl?.path}'。", this);
         rebindOperation.Dispose();
         rebindOperation = null;
 
@@ -99,6 +102,7 @@ public class UIRebindActionBehaviour : MonoBehaviour
 
     public void ResetBinding()
     {
+        Debug.Log($"[输入跟踪] 已重置按键绑定。玩家={GameManager.Instance.GetFocusedPlayerController().GetPlayerID() + 1}，动作='{focusedInputAction.name}'。", this);
         InputActionRebindingExtensions.RemoveAllBindingOverrides(focusedInputAction);
         UpdateBindingDisplayUI();
     }
